@@ -3,7 +3,7 @@ var ajax = require('ajax');
 
 // List of tram stops
 var tramStopsList = [
-  {title: 'Avda. Academia',        type: 1, id1:101, id2:102},
+  {title: 'Avda. Academia',          type: 0, subtitle: 'Hacia Mago de Oz',  id:101},
   {title: 'Parque Goya',             type: 1, id1:201, id2:202},
   {title: 'Juslibol',                type: 1, id1:301, id2:302},
   {title: 'Campus Rio Ebro',         type: 1, id1:401, id2:402},
@@ -39,110 +39,189 @@ var tramStopsList = [
 ];
 
 // TramList Menu
-var tramList = function(){
-  var tramListMenu = new UI.Menu({
-    sections: [{
-      title: 'Tram stops list',
-      items: tramStopsList
-    }]
-  });
-  tramListMenu.on('select', function(e){
-    var URL = 'http://www.zaragoza.es/api/recurso/urbanismo-infraestructuras/tranvia/';
-    // Show progress card
-    var card = new UI.Card({
-      title: e.item.title,
-      subtitle:'Fetching...'
+function tramList() {
+    var tramListMenu = new UI.Menu({
+        sections: [{
+            title: 'Tram stops list',
+            items: tramStopsList
+        }]
     });
-    card.show();
-    if(e.type === 0){
-      // Single stop
-      URL = URL + e.item.id;
-      ajax({
-          url: URL,
-          type: 'json'
-        },
-        function(data) {
-          // Success!
-          console.log('Successfully fetched tram data!');
-          // TO-DO: Fetch, construct card and show
-        },
-        function(error) {
-          // Failure!
-          console.log('Failed fetching tram data: ' + error);
-          
+    tramListMenu.on('select', function(e) {
+        var URL = 'http://www.zaragoza.es/api/recurso/urbanismo-infraestructuras/tranvia/';
+        // Show progress card
+        var card = new UI.Card({
+            title: e.item.title,
+            subtitle: 'Fetching...'
+        });
+        card.show();
+        if (e.item.type == '0') {
+            // Single stop
+            URL += e.item.id + '.json';
+            ajax({
+                    url: URL,
+                    type: 'json'
+                },
+                function(data) {
+                    // Success!
+                    console.log('Successfully fetched tram data!');
+                    console.log(data);
+                    // Build times string
+                    var tramTimes = '';
+                    for (var i = 0; i < data.destinos.length; i++) {
+                        tramTimes += data.destinos[i].minutos + 'min. ';
+                    }
+                    var tramMenu = new UI.Menu({
+                        sections: [{
+                            title: 'L1',
+                            items: [{
+                                title: tramTimes
+                            }]
+                        }]
+                    });
+                    tramMenu.show();
+                    card.hide();
+                },
+                function(error) {
+                    // Failure!
+                    console.log('Failed fetching tram data: ' + error);
+                }
+            );
+        } else {
+            // Dual stop
+            var URL2 = [URL + e.item.id1 + '.json', URL + e.item.id2 + '.json'];
+            var done = 0;
+            var times = ['', ''];
+            var iterationFetch = function(i){
+              console.log("Fetching " + URL2[i]);
+              ajax({
+                        url: URL2[i],
+                        type: 'json',
+                    },
+                    function(data) {
+                        // Success!
+                        console.log('Successfully fetched tram data!');
+                        console.log(data);
+                        // Build times string
+                        var tramTimes = '';
+                        for (var j = 0; j < data.destinos.length; j++) {
+                            tramTimes += data.destinos[j].minutos + 'min. ';
+                        }
+                        times[i] = tramTimes;
+                        done++;
+                    },
+                    function(error) {
+                        // Failure!
+                        console.log('Failed fetching tram data: ' + error);
+                    }
+                );
+            };
+            for (var i = 0; i < 2; i++) {
+                iterationFetch(i);
+            }
+            var buildTramMenu = function(){
+              if(done < 2){
+                setTimeout(buildTramMenu, 50);
+                return;
+              }
+              var tramMenu = new UI.Menu({
+                sections: [{
+                    title: 'L1 hacia Mago de Oz',
+                    items: [{
+                        title: times[0]
+                    }]
+                }, {
+                    title: 'L1 hacia Avda. Academia',
+                    items: [{
+                        title: times[1]
+                    }]
+                }]
+            });
+            tramMenu.show();
+            card.hide();
+          };
+          setTimeout(buildTramMenu, 50);
+          // TO-DO: Fetch twice, construct card and show
         }
-      );
-    }else{
-      // Dual stop
-      // TO-DO: Fetch twice, construct card and show
-    }
-  });
-  tramListMenu.show();
-};
+    });
+    tramListMenu.show();
+}
 
 // BusPost
 // TO-DO: Implement keyboard screen
 
 // Tram Menu
-var tram = function(){
-  var tramMenu = new UI.Menu({
-    sections: [{
-      title: 'Tram stops',
-      items: [{title:'Stops list', subtitle:'Choose from full list'}]},
-      {
-      title: 'Recents',
-      // TO-DO: Add recents
-      items: []}]
-  });
-  tramMenu.on('select', function(e){
-  if(e.itemIndex === 0){
-    // Stops list selected
-    tramList();
-  }else{
-    // One of the recents selected
-    // TO-DO: Request for chosen stop
-  }
-});
-tramMenu.show();
-};
+function tram() {
+    var tramMenu = new UI.Menu({
+        sections: [{
+            title: 'Tram stops',
+            items: [{
+                title: 'Stops list',
+                subtitle: 'Choose from full list'
+            }]
+        }, {
+            title: 'Recents',
+            // TO-DO: Add recents
+            items: []
+        }]
+    });
+    tramMenu.on('select', function(e) {
+        if (e.itemIndex === 0) {
+            // Stops list selected
+            tramList();
+        } else {
+            // One of the recents selected
+            // TO-DO: Request for chosen stop
+        }
+    });
+    tramMenu.show();
+}
 
 // Bus Menu
-var bus = function(){
-  var busMenu = new UI.Menu({
-    sections: [{
-      title: 'Bus stops',
-      // TO-DO: Add stored recents
-      items: [{title:'Post nº', subtitle:'Introduce post number'}]
-    }]
-  });
-  busMenu.on('select', function(e){
-  if(e.itemIndex === 0){
-    // Stops list selected
-    busStopsMenu();
-  }else{
-    // One of the recents selected
-    // TO-DO: Request for chosen stop
-  }
-});
-busMenu.show();
-};
+function bus() {
+    var busMenu = new UI.Menu({
+        sections: [{
+            title: 'Bus stops',
+            // TO-DO: Add stored recents
+            items: [{
+                title: 'Post nº',
+                subtitle: 'Introduce post number'
+            }]
+        }]
+    });
+    busMenu.on('select', function(e) {
+        if (e.itemIndex === 0) {
+            // Stops list selected
+            busStopsMenu();
+        } else {
+            // One of the recents selected
+            // TO-DO: Request for chosen stop
+        }
+    });
+    busMenu.show();
+}
 
 // Show tramBus screen
 var tramBus = new UI.Menu({
-  sections: [{
-    title: 'Choose transport',
-    items: [{title: 'Tram', subtitle: 'Tram stops'},{title: 'Bus', subtitle: 'Bus stops'}]
+    sections: [{
+        title: 'Choose transport',
+        items: [{
+            title: 'Tram',
+            subtitle: 'Tram stops'
+        }, {
+            title: 'Bus',
+            subtitle: 'Bus stops'
+        }]
     }]
-  });
+});
 
 // Set callback for tramBus screen and show
-tramBus.on('select', function(e){
-  if(e.itemIndex === 0){
-    // Tram selected
-    tram();
-  }else{
-    // Bus selected
-    bus();
-  }
+tramBus.on('select', function(e) {
+    if (e.itemIndex === 0) {
+        // Tram selected
+        tram();
+    } else {
+        // Bus selected
+        bus();
+    }
 });
 tramBus.show();
