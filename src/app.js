@@ -161,7 +161,9 @@ function tram() {
         }, {
             title: 'Recents',
             // TO-DO: Add recents
-            items: []
+            items: [{
+              title: 'Comming "soon"'
+            }]
         }]
     });
     tramMenu.on('select', function(e) {
@@ -221,7 +223,11 @@ tramBus.on('select', function(e) {
         tram();
     } else {
         // Bus selected
-        bus();
+        var commingSoon = new UI.Card({
+          title: 'Functionality comming "soon"!'
+        });
+        commingSoon.show();
+        //bus();
     }
 });
 tramBus.show();
