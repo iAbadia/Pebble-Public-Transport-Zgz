@@ -1,5 +1,285 @@
 var UI = require('ui');
 var ajax = require('ajax');
+var Vector2 = require('vector2');
+
+// Numeric keyboard
+
+// More efficient than pebble.js's own function :)
+function mod(n, m) {
+	return ((n % m) + m) % m;
+}
+
+function T3K() {
+	// For accesing the Object from inside its methods
+	var t3k = this;
+	// Change keyboard options
+	var changeKeys = function(up, mid, down) {
+		t3k.UI.bUp.text.remove();
+		t3k.UI.bMid.text.remove();
+		t3k.UI.bDown.text.remove();
+		t3k.UI.bUp.text.text(up);
+		t3k.UI.bMid.text.text(mid);
+		t3k.UI.bDown.text.text(down);
+		console.log(up.length);
+		if (up.length == 1) {
+			t3k.UI.bUp.text.position(new Vector2(119, 5));
+		} else {
+			t3k.UI.bUp.text.position(new Vector2(119, -5));
+		}
+		if (mid.length < 4) {
+			t3k.UI.bMid.text.position(new Vector2(119, 64));
+		} else {
+			t3k.UI.bMid.text.position(new Vector2(119, 54));
+		}
+		if (down.length == 1) {
+			t3k.UI.bDown.text.position(new Vector2(119, 123));
+		} else {
+			t3k.UI.bDown.text.position(new Vector2(119, 113));
+		}
+		t3k.UI.window.add(t3k.UI.bUp.text);
+		t3k.UI.window.add(t3k.UI.bMid.text);
+		t3k.UI.window.add(t3k.UI.bDown.text);
+	};
+	// Set value for target
+	var setValue = function(number) {
+		var index = t3k.UI.values[t3k.target].index();
+		t3k.UI.values[t3k.target].remove();
+		t3k.UI.values[t3k.target].text(number);
+		t3k.UI.window.insert(index, t3k.UI.values[t3k.target]);
+	};
+	// UI elements
+	this.UI = {
+		window: new UI.Window({
+			backgroundColor: 'white',
+			fullscreen: true
+		}), // Window
+		bUp: {
+			button: new UI.Rect({
+				size: new Vector2(30, 50),
+				position: new Vector2(114, 0),
+				backgroundColor: 'black'
+			}),
+			text: new UI.Text({
+				text: '<',
+				font: 'gothic-24-bold',
+				textAlign: 'center',
+				color: 'white',
+				position: new Vector2(119, 5),
+				size: new Vector2(25, 25)
+			})
+		},
+		bMid: {
+			button: new UI.Rect({
+				size: new Vector2(30, 50),
+				position: new Vector2(114, 59),
+				backgroundColor: 'black'
+			}),
+			text: new UI.Text({
+				text: '+',
+				font: 'gothic-24-bold',
+				textAlign: 'center',
+				color: 'white',
+				position: new Vector2(119, 64),
+				size: new Vector2(25, 25)
+			})
+		},
+		bDown: {
+			button: new UI.Rect({
+				size: new Vector2(30, 50),
+				position: new Vector2(114, 118),
+				backgroundColor: 'black'
+			}),
+			text: new UI.Text({
+				text: '>',
+				font: 'gothic-24-bold',
+				textAlign: 'center',
+				color: 'white',
+				position: new Vector2(119, 123),
+				size: new Vector2(25, 25)
+			})
+		},
+		values: [
+			new UI.Text({
+				text: '0',
+				font: 'bitham-42-bold',
+				textAlign: 'center',
+				color: 'black',
+				position: new Vector2(1, 54),
+				size: new Vector2(30, 28)
+			}),
+			new UI.Text({
+				text: '0',
+				font: 'bitham-42-light',
+				textAlign: 'center',
+				color: 'black',
+				position: new Vector2(29, 54),
+				size: new Vector2(30, 28)
+			}),
+			new UI.Text({
+				text: '0',
+				font: 'bitham-42-light',
+				textAlign: 'center',
+				color: 'black',
+				position: new Vector2(56, 54),
+				size: new Vector2(30, 28)
+			}),
+			new UI.Text({
+				text: '0',
+				font: 'bitham-42-light',
+				textAlign: 'center',
+				color: 'black',
+				position: new Vector2(83, 54),
+				size: new Vector2(30, 28)
+			})
+		]
+	};
+	// Current machine state
+	this.state = 0;
+	// Targeted value
+	this.target = 0;
+	this.keyUp = function() {
+		switch (t3k.state) {
+			case 0: // Move target left
+				t3k.UI.values[t3k.target].remove();
+				t3k.UI.values[t3k.target].font('bitham-42-light');
+				t3k.UI.window.add(t3k.UI.values[t3k.target]);
+				t3k.target = mod(t3k.target - 1, 4);
+				t3k.UI.values[t3k.target].remove();
+				t3k.UI.values[t3k.target].font('bitham-42-bold');
+				t3k.UI.window.add(t3k.UI.values[t3k.target]);
+				break;
+			case 1: // 0 1 2
+				changeKeys('0', '1', '2');
+				t3k.state = 2;
+				break;
+			case 2: // Place 0
+				changeKeys('<', '+', '>');
+				setValue('0');
+				t3k.state = 0;
+				break;
+			case 3: // Place 3
+				changeKeys('<', '+', '>');
+				setValue('3');
+				t3k.state = 0;
+				break;
+			case 4: // Place 7
+				changeKeys('<', '+', '>');
+				setValue('7');
+				t3k.state = 0;
+				break;
+			case 5: // Place 4
+				changeKeys('<', '+', '>');
+				setValue('4');
+				t3k.state = 0;
+				break;
+			case 6: // End state
+				console.log('Pitfall!');
+				break;
+			default:
+				// Dead code
+				console.log('Something went wrong, defUp');
+		}
+	};
+	this.keyMid = function() {
+		switch (t3k.state) {
+			case 0: // Show numbers
+				changeKeys('0 1\n2', '3 4\n5 6', '7 8\n9');
+				t3k.state = 1;
+				break;
+			case 1: // 3 4 5 6
+				changeKeys('3', '4 5', '6');
+				t3k.state = 3;
+				break;
+			case 2: // Place 1
+				changeKeys('<', '+', '>');
+				setValue('1');
+				t3k.state = 0;
+				break;
+			case 3: // 4 5
+				changeKeys('4', '', '5');
+				t3k.state = 5;
+				break;
+			case 4: // Place 8
+				changeKeys('<', '+', '>');
+				setValue('8');
+				t3k.state = 0;
+				break;
+			case 5: // Nothing
+				break;
+			case 6: // End state
+				console.log('Pitfall!');
+				break;
+			default:
+				// Dead code
+				console.log('Something went wrong, defMid');
+		}
+	};
+	this.keyDown = function() {
+		switch (t3k.state) {
+			case 0: // Move target right
+				t3k.UI.values[t3k.target].remove();
+				t3k.UI.values[t3k.target].font('bitham-42-light');
+				t3k.UI.window.add(t3k.UI.values[t3k.target]);
+				t3k.target = mod(t3k.target + 1, 4);
+				t3k.UI.values[t3k.target].remove();
+				t3k.UI.values[t3k.target].font('bitham-42-bold');
+				t3k.UI.window.add(t3k.UI.values[t3k.target]);
+				break;
+			case 1: // 7 8 9
+				changeKeys('7', '8', '9');
+				t3k.state = 4;
+				break;
+			case 2: // Place 2
+				changeKeys('<', '+', '>');
+				setValue('2');
+				t3k.state = 0;
+				break;
+			case 3: // Place 6
+				changeKeys('<', '+', '>');
+				setValue('6');
+				t3k.state = 0;
+				break;
+			case 4: // Place 9
+				changeKeys('<', '+', '>');
+				setValue('9');
+				t3k.state = 0;
+				break;
+			case 5: // Place 5
+				changeKeys('<', '+', '>');
+				setValue('5');
+				t3k.state = 0;
+				break;
+			case 6: // End state
+				console.log('Pitfall!');
+				break;
+			default:
+				// Dead code
+				console.log('Something went wrong, defDown');
+		}
+	};
+	this.getValue = function() {
+		return t3k.UI.values[0].text() + t3k.UI.values[1].text() + t3k.UI.values[2].text() + t3k.UI.values[3].text();
+	};
+	this.prepare = function() {
+		t3k.UI.window.add(t3k.UI.bUp.button);
+		t3k.UI.window.add(t3k.UI.bUp.text);
+		t3k.UI.window.add(t3k.UI.bMid.button);
+		t3k.UI.window.add(t3k.UI.bMid.text);
+		t3k.UI.window.add(t3k.UI.bDown.button);
+		t3k.UI.window.add(t3k.UI.bDown.text);
+		t3k.UI.window.add(t3k.UI.values[0]);
+		t3k.UI.window.add(t3k.UI.values[1]);
+		t3k.UI.window.add(t3k.UI.values[2]);
+		t3k.UI.window.add(t3k.UI.values[3]);
+
+		t3k.UI.window.on('click', 'up', t3k.keyUp);
+		t3k.UI.window.on('click', 'select', t3k.keyMid);
+		t3k.UI.window.on('click', 'down', t3k.keyDown);
+	};
+	this.show = function() {
+		t3k.UI.window.show();
+	};
+}
 
 // List of tram stops
 var tramStopsList = [
@@ -24,8 +304,8 @@ var tramStopsList = [
   {title: 'Plaza Aragón',            type: 1, id1:1311, id2:1312},
   {title: 'Gran Via',                type: 1, id1:1401, id2:1402},
   {title: 'Fernando Católico',       type: 1, id1:1501, id2:1502},
-  {title: 'Plaza San Fracisco',      type: 1, id1:1601, id2:1602},
-  {title: 'Carlos V',                type: 1, id1:1701, id2:1702},
+  {title: 'Plz. San Fracisco',     	 type: 1, id1:1601, id2:1602},
+  {title: 'Emp. Carlos V',                type: 1, id1:1701, id2:1702},
   {title: 'Romareda',                type: 1, id1:1801, id2:1802},
   {title: 'Casablanca',              type: 1, id1:1901, id2:1902},
   {title: 'Argualas',                type: 1, id1:2001, id2:2002},
@@ -40,194 +320,242 @@ var tramStopsList = [
 
 // TramList Menu
 function tramList() {
-    var tramListMenu = new UI.Menu({
-        sections: [{
-            title: 'Tram stops list',
-            items: tramStopsList
-        }]
-    });
-    tramListMenu.on('select', function(e) {
-        var URL = 'http://www.zaragoza.es/api/recurso/urbanismo-infraestructuras/tranvia/';
-        // Show progress card
-        var card = new UI.Card({
-            title: e.item.title,
-            subtitle: 'Fetching...'
-        });
-        card.show();
-        if (e.item.type == '0') {
-            // Single stop
-            URL += e.item.id + '.json';
-            ajax({
-                    url: URL,
-                    type: 'json'
-                },
-                function(data) {
-                    // Success!
-                    console.log('Successfully fetched tram data!');
-                    console.log(data);
-                    // Build times string
-                    var tramTimes = '';
-                    for (var i = 0; i < data.destinos.length; i++) {
-                        tramTimes += data.destinos[i].minutos + 'min. ';
-                    }
-                    var tramMenu = new UI.Menu({
-                        sections: [{
-                            title: 'L1',
-                            items: [{
-                                title: tramTimes
-                            }]
-                        }]
-                    });
-                    tramMenu.show();
-                    card.hide();
-                },
-                function(error) {
-                    // Failure!
-                    console.log('Failed fetching tram data: ' + error);
-                }
-            );
-        } else {
-            // Dual stop
-            var URL2 = [URL + e.item.id1 + '.json', URL + e.item.id2 + '.json'];
-            var done = 0;
-            var times = ['', ''];
-            var iterationFetch = function(i){
-              console.log("Fetching " + URL2[i]);
-              ajax({
-                        url: URL2[i],
-                        type: 'json',
-                    },
-                    function(data) {
-                        // Success!
-                        console.log('Successfully fetched tram data!');
-                        console.log(data);
-                        // Build times string
-                        var tramTimes = '';
-                        for (var j = 0; j < data.destinos.length; j++) {
-                            tramTimes += data.destinos[j].minutos + 'min. ';
-                        }
-                        times[i] = tramTimes;
-                        done++;
-                    },
-                    function(error) {
-                        // Failure!
-                        console.log('Failed fetching tram data: ' + error);
-                    }
-                );
-            };
-            for (var i = 0; i < 2; i++) {
-                iterationFetch(i);
-            }
-            var buildTramMenu = function(){
-              if(done < 2){
-                setTimeout(buildTramMenu, 50);
-                return;
-              }
-              var tramMenu = new UI.Menu({
-                sections: [{
-                    title: 'L1 hacia Mago de Oz',
-                    items: [{
-                        title: times[0]
-                    }]
-                }, {
-                    title: 'L1 hacia Avda. Academia',
-                    items: [{
-                        title: times[1]
-                    }]
-                }]
-            });
-            tramMenu.show();
-            card.hide();
-          };
-          setTimeout(buildTramMenu, 50);
-          // TO-DO: Fetch twice, construct card and show
-        }
-    });
-    tramListMenu.show();
+	var tramListMenu = new UI.Menu({
+		fullscreen: true,
+		sections: [{
+			title: 'Tram stops list',
+			items: tramStopsList
+		}]
+	});
+	tramListMenu.on('select', function(e) {
+		var URL = 'http://www.zaragoza.es/api/recurso/urbanismo-infraestructuras/tranvia/';
+		// Show progress card
+		var card = new UI.Card({
+			fullscreen: true,
+			title: e.item.title,
+			subtitle: 'Fetching...'
+		});
+		card.show();
+		if (e.item.type == '0') {
+			// Single stop
+			URL += e.item.id + '.json';
+			ajax({
+					url: URL,
+					type: 'json'
+				},
+				function(data) {
+					// Success!
+					console.log('Successfully fetched tram data!');
+					console.log(data);
+					// Build times string
+					var tramTimes = '';
+					for (var i = 0; i < data.destinos.length; i++) {
+						tramTimes += data.destinos[i].minutos + 'min. ';
+					}
+					var tramMenu = new UI.Menu({
+						fullscreen: true,
+						sections: [{
+							title: 'L1',
+							items: [{
+								title: tramTimes
+							}]
+						}]
+					});
+					tramMenu.show();
+					card.hide();
+				},
+				function(error) {
+					// Failure!
+					console.log('Failed fetching tram data: ' + error);
+				}
+			);
+		} else {
+			// Dual stop
+			var URL2 = [URL + e.item.id1 + '.json', URL + e.item.id2 + '.json'];
+			var done = 0;
+			var times = ['', ''];
+			var iterationFetch = function(i) {
+				console.log("Fetching " + URL2[i]);
+				ajax({
+						url: URL2[i],
+						type: 'json',
+					},
+					function(data) {
+						// Success!
+						console.log('Successfully fetched tram data!');
+						console.log(data);
+						// Build times string
+						var tramTimes = '';
+						for (var j = 0; j < data.destinos.length; j++) {
+							tramTimes += data.destinos[j].minutos + 'min. ';
+						}
+						times[i] = tramTimes;
+						done++;
+					},
+					function(error) {
+						// Failure!
+						console.log('Failed fetching tram data: ' + error);
+					}
+				);
+			};
+			for (var i = 0; i < 2; i++) {
+				iterationFetch(i);
+			}
+			var buildTramMenu = function() {
+				if (done < 2) {
+					setTimeout(buildTramMenu, 50);
+					return;
+				}
+				var tramMenu = new UI.Menu({
+					fullscreen: true,
+					sections: [{
+						title: 'L1 → Mago de Oz',
+						items: [{
+							title: times[0]
+						}]
+					}, {
+						title: 'L1 → Avda. Academia',
+						items: [{
+							title: times[1]
+						}]
+					}]
+				});
+				tramMenu.show();
+				card.hide();
+			};
+			setTimeout(buildTramMenu, 50);
+			// TO-DO: Fetch twice, construct card and show
+		}
+	});
+	tramListMenu.show();
 }
 
 // BusPost
-// TO-DO: Implement keyboard screen
+function busStopsPostN() {
+	var postN = new T3K();
+	postN.prepare();
+	postN.show();
+	postN.UI.window.on('longClick', 'select', function() {
+		var URL = 'http://www.zaragoza.es/api/recurso/urbanismo-infraestructuras/transporte-urbano/poste/';
+		// Show progress card
+		var card = new UI.Card({
+			title: 'Post ' + postN.getValue(),
+			subtitle: 'Fetching...'
+		});
+		card.show();
+		URL += 'tuzsa-' + parseInt(postN.getValue()) + '.json';
+		ajax({
+				url: URL,
+				type: 'json'
+			},
+			function(data) {
+				// Success!
+				console.log('Successfully fetched bus data!');
+				console.log(data);
+				// Build times string
+				var busTimesArray = ['', ''];
+				for (var i = 0; i < data.destinos.length; i++) {
+					var first = data.destinos[i].primero.split(" ");
+					var sec = data.destinos[i].segundo.split(" ");
+					busTimesArray[i] = {
+						title: 'Linea ' + data.destinos[i].linea,
+						items: [{
+							title: first[0] + first[1].substr(0, 3) + ' ' + sec[0] + sec[1].substr(0, 3)
+						}]
+					};
+				}
+				new UI.Menu({
+					fullscreen: true,
+					sections: busTimesArray
+				}).show();
+				card.hide();
+			},
+			function(error) {
+				// Failure!
+				console.log('Failed fetching bus data: ' + error);
+			}
+		);
+	});
+}
 
 // Tram Menu
 function tram() {
-    var tramMenu = new UI.Menu({
-        sections: [{
-            title: 'Tram stops',
-            items: [{
-                title: 'Stops list',
-                subtitle: 'Choose from full list'
-            }]
-        }, {
-            title: 'Recents',
-            // TO-DO: Add recents
-            items: [{
-              title: 'Coming soon'
-            }]
-        }]
-    });
-    tramMenu.on('select', function(e) {
-        if (e.itemIndex === 0) {
-            // Stops list selected
-            tramList();
-        } else {
-            // One of the recents selected
-            // TO-DO: Request for chosen stop
-        }
-    });
-    tramMenu.show();
+	var tramMenu = new UI.Menu({
+		fullscreen: true,
+		sections: [{
+			title: 'Tram stops',
+			items: [{
+				title: 'Stops list',
+				subtitle: 'Choose from full list'
+			}]
+		}, {
+			title: 'Recents',
+			// TO-DO: Add recents
+			items: [{
+				title: 'Coming soon'
+			}]
+		}]
+	});
+	tramMenu.on('select', function(e) {
+		if (e.itemIndex === 0) {
+			// Stops list selected
+			tramList();
+		} else {
+			// One of the recents selected
+			// TO-DO: Request for chosen stop
+		}
+	});
+	tramMenu.show();
 }
 
 // Bus Menu
 function bus() {
-    var busMenu = new UI.Menu({
-        sections: [{
-            title: 'Bus stops',
-            // TO-DO: Add stored recents
-            items: [{
-                title: 'Post nº',
-                subtitle: 'Introduce post number'
-            }]
-        }]
-    });
-    busMenu.on('select', function(e) {
-        if (e.itemIndex === 0) {
-            // Stops list selected
-            busStopsMenu();
-        } else {
-            // One of the recents selected
-            // TO-DO: Request for chosen stop
-        }
-    });
-    busMenu.show();
+	var busMenu = new UI.Menu({
+		fullscreen: true,
+		sections: [{
+			title: 'Bus stops',
+			// TO-DO: Add stored recents
+			items: [{
+				title: 'Post nº',
+				subtitle: 'Introduce post number'
+			}]
+		}]
+	});
+	busMenu.on('select', function(e) {
+		if (e.itemIndex === 0) {
+			// Stops list selected
+			busStopsPostN();
+		} else {
+			// One of the recents selected
+			// TO-DO: Request for chosen stop
+		}
+	});
+	busMenu.show();
 }
 
 // Show tramBus screen
 var tramBus = new UI.Menu({
-    sections: [{
-        title: 'Choose transport',
-        items: [{
-            title: 'Tram',
-            subtitle: 'Tram stops'
-        }, {
-            title: 'Bus',
-            subtitle: 'Bus stops'
-        }]
-    }]
+	fullscreen: true,
+	sections: [{
+		title: 'Choose transport',
+		items: [{
+			title: 'Tram',
+			subtitle: 'Tram stops'
+		}, {
+			title: 'Bus',
+			subtitle: 'Bus stops'
+		}]
+	}]
 });
 
 // Set callback for tramBus screen and show
 tramBus.on('select', function(e) {
-    if (e.itemIndex === 0) {
-        // Tram selected
-        tram();
-    } else {
-        // Bus selected
-        var commingSoon = new UI.Card({
-          title: 'Functionality coming "soon"!'
-        });
-        commingSoon.show();
-        //bus();
-    }
+	if (e.itemIndex === 0) {
+		// Tram selected
+		tram();
+	} else {
+		// Bus selected
+		bus();
+	}
 });
 tramBus.show();
