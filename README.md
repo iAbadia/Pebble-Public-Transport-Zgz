@@ -4,5 +4,5 @@ Zaragoza tram and bus Pebble watchapp
 ## Screenshots
 
 <p align="center">
-  <img src="http://i.imgur.com/YR9hCYc.png"/>
+  <img src="http://i.imgur.com/ChEvjkB.png"/>
 </p>
