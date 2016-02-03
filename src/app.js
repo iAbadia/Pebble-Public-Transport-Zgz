@@ -17,18 +17,19 @@ function addToRecents(key, _new){
 		for(var i=0;i<e.length && !result;i++){
 			if(e[i].id == _new.id){
 				result = true;
+				e.splice(i, 1);
 			}
 		}
 		return result;
 	}
 	if(!alreadyIn(recents, _new)){
-		if(recents.length == 10){
+		if(recents.length > 9){
 			// Remove last
 			recents.pop();
 		}
-		recents.unshift(_new);
-		settings.data(key, recents);
 	}
+	recents.unshift(_new);
+	settings.data(key, recents);
 }
 
 // TRAM
