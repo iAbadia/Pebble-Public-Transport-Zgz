@@ -184,6 +184,19 @@ function requestTram(e){
 			// TO-DO: Fetch twice, construct card and show
 		}
 }
+function tramList() {
+	var tramListMenu = new UI.Menu({
+		fullscreen: true,
+		sections: [{
+			title: 'Tram stops list',
+			items: tramStopsList
+		}]
+	});
+	tramListMenu.on('select', function(e) {
+		requestTram(e);
+	});
+	tramListMenu.show();
+}
 function tram() {
 	var tramMenu = new UI.Menu({
 		fullscreen: true,
@@ -209,19 +222,6 @@ function tram() {
 		}
 	});
 	tramMenu.show();
-}
-function tramList() {
-	var tramListMenu = new UI.Menu({
-		fullscreen: true,
-		sections: [{
-			title: 'Tram stops list',
-			items: tramStopsList
-		}]
-	});
-	tramListMenu.on('select', function(e) {
-		requestTram(e);
-	});
-	tramListMenu.show();
 }
 
 // BUS
