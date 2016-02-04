@@ -4,7 +4,7 @@
         ""
     ],
     "companyName": "Inaki Abadia",
-    "longName": "urbanosZaragoza",
+    "longName": "publicTransportZaragoza",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -37,7 +37,7 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "urbanosZGZ",
+    "shortName": "ptZgz",
     "targetPlatforms": [
         "aplite",
         "basalt"
