@@ -1,20 +1,20 @@
 #!/bin/bash
 set -e
-echo 'pBuild 1.1_iAbadia'
+echo 'pBuild 1.0'
 echo 'Installing Pebble SDK and its Dependencies...'
 
 cd ~ 
 mkdir -p ~/pebble-dev
-mkdir -p ~/.pebble-sdk
-touch ~/.pebble-sdk/ENABLE_ANALYTICS
+touch ~/pebble-dev/ENABLE_ANALYTICS
 
 # Get the Pebble SDK and toolchain
+PEBBLE_SDK_VER=${PEBBLE_SDK#PebbleSDK-}
 if [ ! -d $HOME/pebble-dev/${PEBBLE_SDK} ]; then
-  wget https://s3.amazonaws.com/assets.getpebble.com/pebble-tool/${PEBBLE_SDK}.tar.bz2 -O ${PEBBLE_SDK}.tar.bz2
+  wget https://sdk.getpebble.com/download/${PEBBLE_SDK_VER} -O PebbleSDK-${PEBBLE_SDK_VER}.tar.gz
   wget http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk/arm-cs-tools-ubuntu-universal.tar.gz
 
   # Extract the SDK
-  tar jxf ${PEBBLE_SDK}.tar.bz2 -C ~/pebble-dev/
+  tar zxf PebbleSDK-${PEBBLE_SDK_VER}.tar.gz -C ~/pebble-dev/
   # Extract the toolchain
   tar zxf arm-cs-tools-ubuntu-universal.tar.gz -C ~/pebble-dev/${PEBBLE_SDK}
 
