@@ -5,7 +5,7 @@ echo 'Installing Pebble SDK and its Dependencies...'
 
 cd ~ 
 mkdir -p ~/pebble-dev
-touch ~/pebble-dev/ENABLE_ANALYTICS
+touch ~/.pebble-sdk/ENABLE_ANALYTICS
 
 # Get the Pebble SDK and toolchain
 if [ ! -d $HOME/pebble-dev/${PEBBLE_SDK} ]; then
