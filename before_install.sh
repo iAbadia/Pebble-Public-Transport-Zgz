@@ -5,6 +5,7 @@ echo 'Installing Pebble SDK and its Dependencies...'
 
 cd ~ 
 mkdir -p ~/pebble-dev
+mkdir -p ~/.pebble-sdk
 touch ~/.pebble-sdk/ENABLE_ANALYTICS
 
 # Get the Pebble SDK and toolchain
