@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-echo 'pBuild 1.0'
+echo 'pBuild 1.1_iAbadia'
 echo 'Installing Pebble SDK and its Dependencies...'
 
 cd ~ 
