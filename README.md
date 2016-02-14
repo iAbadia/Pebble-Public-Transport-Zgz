@@ -17,4 +17,4 @@ Zaragoza tram and bus times in your pebble!
 </p>
 
 ## License
-This proyect is published under the [MIT License](https://github.com/iAbadia/Pebble-Public-Transport-Zgz/blob/master/LICENSE) 
+This project has been published under the [MIT License](https://github.com/iAbadia/Pebble-Public-Transport-Zgz/blob/master/LICENSE) 
