@@ -1,4 +1,4 @@
-# Zaragoza Public Transport Pebble app
+# Zaragoza Public Transport Pebble app [![Build Status](https://travis-ci.org/iAbadia/Pebble-Public-Transport-Zgz.svg?branch=master)](https://travis-ci.org/iAbadia/Pebble-Public-Transport-Zgz)
 Zaragoza tram and bus times in your pebble!
 
 <p align="center">
