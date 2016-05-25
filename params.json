@@ -1,0 +1,6 @@
+{
+  "name": "Pebble-public-transport-zgz",
+  "tagline": "Zaragoza tram and bus Pebble watchapp",
+  "body": "# Zaragoza Public Transport Pebble app [![Build Status](https://travis-ci.org/iAbadia/Pebble-Public-Transport-Zgz.svg?branch=master)](https://travis-ci.org/iAbadia/Pebble-Public-Transport-Zgz)\r\nZaragoza tram and bus times in your pebble!\r\n\r\n<p align=\"center\">\r\n  <img src=\"http://i.imgur.com/jP1pCkG.png\"/>\r\n</p>\r\n\r\n#### How to use:\r\n\r\n* For tram times, select between the full list of stops or choose one from your recent searches.\r\n* For bus times, choose from recent searches or input the post number and longpress select. The post will be added to recent searches either it exists or not.\r\n\r\n## Screenshots\r\n\r\n<p align=\"center\">\r\n  <img src=\"http://i.imgur.com/ChEvjkB.png\"/>\r\n</p>\r\n\r\n## License\r\nThis project has been published under the [MIT License](https://github.com/iAbadia/Pebble-Public-Transport-Zgz/blob/master/LICENSE) \r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
