@@ -3,14 +3,21 @@ var ajax = require('ajax');
 var Vector2 = require('vector2');
 var settings = require('settings');
 
-// RECENTS
-if (settings.data('tramRecents') === undefined) {
-  settings.data('tramRecents', []);
-}
-if (settings.data('busRecents') === undefined) {
-  settings.data('busRecents', []);
-}
+// Wait for init
+Pebble.addEventListener("ready", function() {
+  // Start app
+  tramBus.show();
+  
+  // Load recents
+  if (settings.data('tramRecents') === undefined) {
+    settings.data('tramRecents', []);
+  }
+  if (settings.data('busRecents') === undefined) {
+    settings.data('busRecents', []);
+  }
+});
 
+// RECENTS
 function addToRecents(key, _new) {
   var recents = settings.data(key);
 
@@ -621,4 +628,3 @@ tramBus.on('select', function(e) {
     bus();
   }
 });
-tramBus.show();
